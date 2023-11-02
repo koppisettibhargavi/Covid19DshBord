@@ -1,0 +1,38 @@
+.Contain {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: white;
+  background-color: #161625;
+  font-size: 20px;
+  width: 100%;
+}
+
+.itemIcon {
+  display: flex;
+  padding-left: 10px;
+  height: 40px;
+  width: 40px;
+}
+@media screen and(min-width:786px) {
+  .itemIcon {
+    display: flex;
+    padding-left: 5px;
+    height: 20px;
+    width: 20px;
+  }
+  .Container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: white;
+    background-color: #161625;
+    font-size: 5px;
+  }
+}
+.iconContainer {
+  display: flex;
+  flex-direction: row;
+}

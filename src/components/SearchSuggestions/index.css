@@ -1,0 +1,36 @@
+.button {
+  color: #facc15;
+  border: none;
+  background-color: #161625;
+  width: 700px;
+  height: 34px;
+  cursor: alias;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+}
+
+.list {
+  list-style-type: none;
+  background-color: #161625;
+  text-decoration: none;
+}
+
+@media screen and (max-width: 600px) {
+  .button {
+    color: #facc15;
+    border: none;
+    background-color: #161625;
+    width: 312px;
+    height: 48;
+    cursor: alias;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+  }
+}
+.para {
+  color: #64748b;
+  border: none;
+  text-decoration: none;
+}

@@ -1,0 +1,23 @@
+.row {
+  display: flex;
+  flex-direction: row;
+  color: #94a3b8;
+  padding-right: 30px;
+  width: 400px;
+}
+.head {
+  font-family: Roboto;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 28px;
+  letter-spacing: 0em;
+  padding-right: 40px;
+  display: flex;
+  justify-content: flex-start;
+}
+.para {
+  width: 150px;
+  height: 19px;
+  display: flex;
+  justify-content: flex-start;
+}

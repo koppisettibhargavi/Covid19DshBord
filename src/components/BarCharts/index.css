@@ -1,0 +1,51 @@
+.barChart {
+  border-style: none;
+  background-color: transparent;
+}
+
+.round {
+  border-radius: 8px 8px 0px 0px;
+}
+
+.BarChart {
+  padding: 10px;
+}
+
+.lineChart {
+  padding: 10px;
+}
+
+.lineContainer1 {
+  border-radius: 12px;
+  background: #331427;
+  margin: 20px;
+  padding: 20px;
+}
+.lineContainer2 {
+  border-radius: 12px;
+  background: #132240;
+  margin: 20px;
+  padding: 20px;
+}
+.lineContainer4 {
+  border-radius: 12px;
+  background: #1c1c2b;
+  margin: 20px;
+  padding: 20px;
+}
+.lineContainer3 {
+  border-radius: 12px;
+  background: #182829;
+  margin: 20px;
+  padding: 20px;
+}
+.lineContainer5 {
+  border-radius: 12px;
+  background: #230f41;
+  margin: 20px;
+  padding: 20px;
+}
+
+.ChartContainer {
+  padding: 10px;
+}
