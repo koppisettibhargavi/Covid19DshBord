@@ -26,6 +26,7 @@ specifiers:
   react-scripts: 4.0.3
   react-select: 4.3.1
   recharts: 2.1.5
+  uuid: 9.0.1
 
 dependencies:
   '@testing-library/jest-dom': 5.11.9
@@ -45,6 +46,7 @@ dependencies:
   react-router-dom: 5.3.0_react@17.0.1
   react-select: 4.3.1_react-dom@17.0.1+react@17.0.1
   recharts: 2.1.5_react-dom@17.0.1+react@17.0.1
+  uuid: 9.0.1
 
 devDependencies:
   eslint-config-airbnb: 18.2.1
@@ -14020,6 +14022,11 @@ packages:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
     hasBin: true
     dev: true
+
+  /uuid/9.0.1:
+    resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
+    hasBin: true
+    dev: false
 
   /v8-compile-cache/2.4.0:
     resolution: {integrity: sha512-ocyWc3bAHBB/guyqJQVI5o4BZkPhznPYUG2ea80Gond/BgNWpap8TOmLSeeQG7bnh2KMISxskdADG59j7zruhw==}

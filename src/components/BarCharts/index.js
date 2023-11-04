@@ -158,11 +158,15 @@ class BarCharts extends Component {
     return (
       <>
         {isLoading ? (
-          <div testid="timelinesDataLoader">
+          <div
+          // testid="timelinesDataLoader"
+          >
             <LoaderSpinner />
           </div>
         ) : (
-          <div testid="lineChartsContainer">
+          <div
+          // testid="lineChartsContainer"
+          >
             <div className="BarChart">
               <ResponsiveContainer width="100%" height={500}>
                 <BarChart

@@ -159,8 +159,9 @@ const App = () => (
     <Route exact path="/" component={Home} />
     <Route exact path="/about" component={About} />
     <Route exact path="/state/:stateCode" component={stateSpecificRoute} />
-    <Route exact path="/bad-path" component={NotFound} />
-    <Redirect to="/bad-path" />
+    <Route exact path="/notfound" component={NotFound} />
+    <Route exact path="/bad-path" />
+    <Redirect to="/notfound" />
   </Switch>
 )
 

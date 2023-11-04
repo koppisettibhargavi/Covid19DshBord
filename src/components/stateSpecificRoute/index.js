@@ -1,4 +1,5 @@
 import {Component} from 'react'
+import {Redirect} from 'react-router-dom'
 import Header from '../Header'
 import Footer from '../Footer'
 import LoaderSpinner from '../LoaderSpinner'
@@ -163,11 +164,23 @@ class stateSpecificRoute extends Component {
     isRecover: false,
     isDecease: false,
     category: 'confirmed',
-    list: [],
+    id: '',
+    DistrictData: [],
   }
 
   componentDidMount() {
-    this.getStateData()
+    this.isStateInclude()
+  }
+
+  isStateInclude = () => {
+    const {match} = this.props
+    const {params} = match
+    const {id} = params
+    const isInclude = statesList.find(each => each.state_code === id)
+    if (isInclude !== undefined) {
+      return <Redirect to="/notfound" />
+    }
+    return this.getStateData()
   }
 
   clickConfirm = () => {
@@ -231,129 +244,160 @@ class stateSpecificRoute extends Component {
     }
   }
 
-  getUpdatedData = (stateCode, data) => {
-    const stateSpecificDataList = []
-
-    if (data[stateCode]) {
-      const {total} = data[stateCode]
-      const confirmed = total.confirmed ? total.confirmed : 0
-      const deceased = total.deceased ? total.deceased : 0
-      const recovered = total.recovered ? total.recovered : 0
-      const tested = total.tested ? total.tested : 0
-      const lastUpDated = data[stateCode].meta.last_updated
-        ? data[stateCode].meta.last_updated
-        : 0
-      stateSpecificDataList.push({
-        name: statesList.find(state => state.stateCode === stateCode)
-          .state_name,
-        confirmed,
-        deceased,
-        recovered,
-        tested,
-        lastUpDated,
-        active: confirmed - (deceased + recovered),
-      })
-    }
-    return stateSpecificDataList
-  }
-
   getStateData = async () => {
     const {match} = this.props
     const {params} = match
     const {stateCode} = params
-    // console.log(params)
+
     const url = 'https://apis.ccbp.in/covid19-state-wise-data'
     const options = {
       method: 'Get',
     }
     const response = await fetch(url, options)
     const data = await response.json()
-    const stateData = data[stateCode]
-    const keys = Object.keys(stateData.districts)
-    const statesName = statesList.filter(each => each.state_code === stateCode)
-    const distData = stateData.districts
-    // console.log(distData[keys[0]])
+
+    const isStateCode = statesList.filter(
+      eachitem => eachitem.state_code === stateCode,
+    )
+    const Name = isStateCode[0].state_name
+
     let activeCases = 0
     let recoveredCases = 0
     let deceasedCases = 0
     let confirmedCases = 0
     let testedCases = 0
-    keys.forEach(eachDist => {
-      if (stateData.districts[eachDist]) {
-        const {total} = stateData.districts[eachDist]
+    statesList.forEach(eachState => {
+      if (data[eachState.state_code]) {
+        const {total} = data[eachState.state_code]
         confirmedCases += total.confirmed ? total.confirmed : 0
         recoveredCases += total.recovered ? total.recovered : 0
         deceasedCases += total.deceased ? total.deceased : 0
         testedCases += total.tested ? total.tested : 0
-        // console.log(total.tested)
       }
     })
 
-    const newArray = keys.map(each => ({
-      districtName: each,
-      confirmed: distData[each].total.confirmed,
-      recovered: distData[each].total.recovered,
-      deceased: distData[each].total.deceased,
-    }))
-    // console.log(newArray.active, 'active')
-
     activeCases += confirmedCases - (recoveredCases + deceasedCases)
-    const dateString = new Date(stateData.meta.last_updated)
-    // console.log(testedCases)
+    const date = data[stateCode].meta.last_updated
+    const rowData = data[stateCode]
+
     this.setState({
       activeCases,
       recoveredCases,
       deceasedCases,
       confirmedCases,
       testedCases,
-      name: statesName[0].state_name,
       isLoading: false,
-      date: dateString,
-      list: newArray,
+      date,
+      id: stateCode,
+      name: Name,
+      rowData,
     })
   }
 
-  getTopDistricData = () => {
-    const {list, category} = this.state
+  getChartData = category => {
+    const {DistrictData} = this.state
+    const DistrictNames = Object.keys(DistrictData)
+    console.log(category)
     switch (category) {
       case 'confirmed':
-        return list.map(each => ({
-          name: each.districtName,
-          values: each.confirmed ? each.confirmed : 0,
+        return DistrictNames.map(each => ({
+          name: each,
+          color: 'red',
+          backColor: '#331427',
+          values: DistrictData[each].total.confirmed
+            ? DistrictData[each].total.confirmed
+            : 0,
         }))
       case 'active':
-        return list.map(each => ({
-          name: each.districtName,
+        return DistrictNames.map(each => ({
+          name: each,
+          color: 'blue',
+          backColor: '#132240',
           values:
-            each.confirmed - (each.recovered + each.deceased)
-              ? each.confirmed - (each.recovered + each.deceased)
+            DistrictData[each].total.confirmed -
+            (DistrictData[each].total.recovered +
+              DistrictData[each].total.deceased)
+              ? DistrictData[each].total.confirmed -
+                (DistrictData[each].total.recovered +
+                  DistrictData[each].total.deceased)
               : 0,
         }))
       case 'deceased':
-        return list.map(each => ({
-          name: each.districtName,
-          values: each.deceased ? each.deceased : 0,
+        return DistrictNames.map(each => ({
+          name: each,
+          color: '#6C757D',
+          backColor: '#1C1C2B',
+          values: DistrictData[each].total.deceased
+            ? DistrictData[each].total.deceased
+            : 0,
         }))
       case 'recovered':
-        return list.map(each => ({
-          name: each.districtName,
-          values: each.recovered ? each.recovered : 0,
+        return DistrictNames.map(each => ({
+          name: each,
+          color: 'green',
+          backColor: '#182829',
+          values: DistrictData[each].total.recovered
+            ? DistrictData[each].total.recovered
+            : 0,
         }))
+      case 'tested':
+        return DistrictNames.map(each => ({
+          name: each,
+          color: '#230F41',
+          backColor: '#9673B9',
+          values: DistrictData[each].total.tested
+            ? DistrictData[each].tested
+            : 0,
+        }))
+
       default:
         return null
     }
   }
 
+  getTopData = category => {
+    const {rowData, id} = this.state
+    const DistrictsData = rowData.districts
+    console.log(DistrictsData)
+    const listOfDistricts = Object.keys(DistrictsData)
+    console.log(listOfDistricts['East Singhbhum'])
+    const dataElement = listOfDistricts.map(each => ({
+      name: each,
+      value: DistrictsData[each].total[category]
+        ? DistrictsData[each].total[category]
+        : 0,
+    }))
+    dataElement.sort((a, b) => b.values - a.values)
+
+    const activeData = listOfDistricts.map(each => ({
+      name: each,
+      value:
+        DistrictsData[each].total.confirmed - DistrictsData[each].total.deceased
+          ? DistrictsData[each].total.confirmed -
+            DistrictsData[each].total.deceased
+          : 0,
+    }))
+    activeData.sort((a, b) => b.values - a.values)
+
+    if (category === 'active') {
+      return activeData
+    }
+    return dataElement
+  }
+
   getTopDistricUi = () => {
     const {category} = this.state
     const HeadingColor = this.getcolor(category)
-    const TopDistricData = this.getTopDistricData()
-    TopDistricData.sort((a, b) => b.values - a.values)
+    const TopDistrictData = this.getTopData(category)
+    console.log(TopDistrictData, 'topData')
     return (
       <>
         <h1 className={HeadingColor}>Top districts</h1>
-        <ul className="list" testid="topDistrictsUnorderedList">
-          {TopDistricData.map(each => (
+        <ul
+          className="list"
+          // testid="topDistrictsUnorderedList"
+        >
+          {TopDistrictData.map(each => (
             <TopDistric name={each.name} number={each.values} key={each.name} />
           ))}
         </ul>
@@ -363,7 +407,6 @@ class stateSpecificRoute extends Component {
 
   getSpecificData = () => {
     const {
-      name,
       date,
       testedCases,
       activeCases,
@@ -382,7 +425,9 @@ class stateSpecificRoute extends Component {
 
     return (
       <>
-        <div testid="stateSpecificConfirmedCasesContainer">
+        <div
+        // testid="stateSpecificConfirmedCasesContainer"
+        >
           <button
             type="button"
             className={isConfirm ? 'back1' : 'card1'}
@@ -397,7 +442,9 @@ class stateSpecificRoute extends Component {
             <p>{confirmedCases}</p>
           </button>
         </div>
-        <div testid="stateSpecificActiveCasesContainer">
+        <div
+        // testid="stateSpecificActiveCasesContainer"
+        >
           <button
             type="button"
             className={isActive ? 'back2' : 'card2'}
@@ -412,7 +459,9 @@ class stateSpecificRoute extends Component {
             <p>{confirmedCases}</p>
           </button>
         </div>
-        <div testid="stateSpecificRecoveredCasesContainer">
+        <div
+        // testid="stateSpecificRecoveredCasesContainer"
+        >
           <button
             type="button"
             className={isRecover ? 'back3' : 'card3'}
@@ -427,7 +476,9 @@ class stateSpecificRoute extends Component {
             <p>{recoveredCases}</p>
           </button>
         </div>
-        <div testid="stateSpecificDeceasedCasesContainer" key="deceased">
+        <div
+        // testid="stateSpecificDeceasedCasesContainer" key="deceased"
+        >
           <button
             type="button"
             className={isDecease ? 'back4' : 'card4'}
@@ -455,6 +506,7 @@ class stateSpecificRoute extends Component {
       name,
       testedCases,
     } = this.state
+
     const months = [
       'Jan',
       'Feb',
@@ -479,7 +531,9 @@ class stateSpecificRoute extends Component {
         />
 
         {isLoading ? (
-          <div testid="stateDetailsLoader">
+          <div
+          // testid="stateDetailsLoader"
+          >
             <LoaderSpinner />
           </div>
         ) : (

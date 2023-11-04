@@ -5,11 +5,11 @@ import {AiOutlineRight} from 'react-icons/ai'
 import './index.css'
 
 const SearchSuggestions = props => {
-  const {stateCode, stateName} = props
+  const {stateCode, stateName, id} = props
 
   return (
     <li className="list">
-      <Link to={`/state/${stateCode}`}>
+      <Link to={`/state/${id}`}>
         <button type="button" className="button">
           <p className="para">{stateName}</p>
           <div>
