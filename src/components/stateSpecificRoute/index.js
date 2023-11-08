@@ -163,24 +163,13 @@ class stateSpecificRoute extends Component {
     isActive: false,
     isRecover: false,
     isDecease: false,
-    category: 'confirmed',
+    category: 'Confirmed',
     id: '',
     DistrictData: [],
   }
 
   componentDidMount() {
-    this.isStateInclude()
-  }
-
-  isStateInclude = () => {
-    const {match} = this.props
-    const {params} = match
-    const {id} = params
-    const isInclude = statesList.find(each => each.state_code === id)
-    if (isInclude !== undefined) {
-      return <Redirect to="/notfound" />
-    }
-    return this.getStateData()
+    this.getStateData()
   }
 
   clickConfirm = () => {
@@ -189,7 +178,7 @@ class stateSpecificRoute extends Component {
       isActive: false,
       isRecover: false,
       isDecease: false,
-      category: 'confirmed',
+      category: 'Confirmed',
     }))
   }
 
@@ -199,7 +188,7 @@ class stateSpecificRoute extends Component {
       isConfirm: false,
       isRecover: false,
       isDecease: false,
-      category: 'active',
+      category: 'Active',
     }))
   }
 
@@ -209,7 +198,7 @@ class stateSpecificRoute extends Component {
       isActive: false,
       isConfirm: false,
       isDecease: false,
-      category: 'recovered',
+      category: 'Recovered',
     }))
   }
 
@@ -219,7 +208,7 @@ class stateSpecificRoute extends Component {
       isRecover: false,
       isConfirm: false,
       isActive: false,
-      category: 'deceased',
+      category: 'Deceased',
     }))
   }
 
@@ -230,7 +219,8 @@ class stateSpecificRoute extends Component {
   }
 
   getcolor = category => {
-    switch (category) {
+    const cat = category.toLowerCase()
+    switch (cat) {
       case 'confirmed':
         return 'confirmedColor'
       case 'active':
@@ -261,7 +251,6 @@ class stateSpecificRoute extends Component {
     )
     const Name = isStateCode[0].state_name
 
-    let activeCases = 0
     let recoveredCases = 0
     let deceasedCases = 0
     let confirmedCases = 0
@@ -275,13 +264,12 @@ class stateSpecificRoute extends Component {
         testedCases += total.tested ? total.tested : 0
       }
     })
-
-    activeCases += confirmedCases - (recoveredCases + deceasedCases)
+    const dc = deceasedCases + recoveredCases
     const date = data[stateCode].meta.last_updated
-    const rowData = data[stateCode]
+    const rowData = data
 
     this.setState({
-      activeCases,
+      activeCases: confirmedCases - dc,
       recoveredCases,
       deceasedCases,
       confirmedCases,
@@ -294,92 +282,49 @@ class stateSpecificRoute extends Component {
     })
   }
 
-  getChartData = category => {
-    const {DistrictData} = this.state
-    const DistrictNames = Object.keys(DistrictData)
-    console.log(category)
-    switch (category) {
-      case 'confirmed':
-        return DistrictNames.map(each => ({
-          name: each,
-          color: 'red',
-          backColor: '#331427',
-          values: DistrictData[each].total.confirmed
-            ? DistrictData[each].total.confirmed
-            : 0,
-        }))
-      case 'active':
-        return DistrictNames.map(each => ({
-          name: each,
-          color: 'blue',
-          backColor: '#132240',
-          values:
-            DistrictData[each].total.confirmed -
-            (DistrictData[each].total.recovered +
-              DistrictData[each].total.deceased)
-              ? DistrictData[each].total.confirmed -
-                (DistrictData[each].total.recovered +
-                  DistrictData[each].total.deceased)
-              : 0,
-        }))
-      case 'deceased':
-        return DistrictNames.map(each => ({
-          name: each,
-          color: '#6C757D',
-          backColor: '#1C1C2B',
-          values: DistrictData[each].total.deceased
-            ? DistrictData[each].total.deceased
-            : 0,
-        }))
-      case 'recovered':
-        return DistrictNames.map(each => ({
-          name: each,
-          color: 'green',
-          backColor: '#182829',
-          values: DistrictData[each].total.recovered
-            ? DistrictData[each].total.recovered
-            : 0,
-        }))
-      case 'tested':
-        return DistrictNames.map(each => ({
-          name: each,
-          color: '#230F41',
-          backColor: '#9673B9',
-          values: DistrictData[each].total.tested
-            ? DistrictData[each].tested
-            : 0,
-        }))
-
-      default:
-        return null
-    }
-  }
-
   getTopData = category => {
     const {rowData, id} = this.state
-    const DistrictsData = rowData.districts
-    console.log(DistrictsData)
+    const DistrictsData = rowData[id].districts
     const listOfDistricts = Object.keys(DistrictsData)
-    console.log(listOfDistricts['East Singhbhum'])
-    const dataElement = listOfDistricts.map(each => ({
-      name: each,
-      value: DistrictsData[each].total[category]
-        ? DistrictsData[each].total[category]
-        : 0,
-    }))
-    dataElement.sort((a, b) => b.values - a.values)
+    console.log(DistrictsData)
+    const lowerCategory = category.toLowerCase()
+    const dataElement = listOfDistricts.map(eachItem =>
+      DistrictsData[eachItem].total === undefined
+        ? {
+            name: eachItem,
+            value: 0,
+          }
+        : {
+            name: eachItem,
+            value: DistrictsData[eachItem].total[lowerCategory]
+              ? DistrictsData[eachItem].total[lowerCategory]
+              : 0,
+          },
+    )
 
-    const activeData = listOfDistricts.map(each => ({
-      name: each,
-      value:
-        DistrictsData[each].total.confirmed - DistrictsData[each].total.deceased
-          ? DistrictsData[each].total.confirmed -
-            DistrictsData[each].total.deceased
-          : 0,
-    }))
-    activeData.sort((a, b) => b.values - a.values)
+    console.log(dataElement)
+    dataElement.sort((a, b) => b.value - a.value)
+    const activeData = listOfDistricts.map(eachActive =>
+      DistrictsData[eachActive].total === undefined
+        ? {
+            name: eachActive,
+            value: 0,
+          }
+        : {
+            name: eachActive,
+            value:
+              DistrictsData[eachActive].total.confirmed -
+              (DistrictsData[eachActive].total.recovered +
+                DistrictsData[eachActive].total.deceased)
+                ? DistrictsData[eachActive].total.confirmed -
+                  (DistrictsData[eachActive].total.recovered +
+                    DistrictsData[eachActive].total.deceased)
+                : 0,
+          },
+    )
+    activeData.sort((a, b) => b.value - a.value)
 
-    if (category === 'active') {
+    if (category === 'Active') {
       return activeData
     }
     return dataElement
@@ -392,13 +337,10 @@ class stateSpecificRoute extends Component {
     console.log(TopDistrictData, 'topData')
     return (
       <>
-        <h1 className={HeadingColor}>Top districts</h1>
-        <ul
-          className="list"
-          // testid="topDistrictsUnorderedList"
-        >
+        <h1 className={HeadingColor}>Top Districts</h1>
+        <ul className="list" testid="topDistrictsUnorderedList">
           {TopDistrictData.map(each => (
-            <TopDistric name={each.name} number={each.values} key={each.name} />
+            <TopDistric name={each.name} number={each.value} key={each.name} />
           ))}
         </ul>
       </>
@@ -424,76 +366,76 @@ class stateSpecificRoute extends Component {
     } = this.state
 
     return (
-      <>
-        <div
-        // testid="stateSpecificConfirmedCasesContainer"
-        >
-          <button
-            type="button"
-            className={isConfirm ? 'back1' : 'card1'}
-            onClick={this.clickConfirm}
-          >
-            <p>Confirmed</p>
-            <img
-              src="https://res.cloudinary.com/dgahf1oml/image/upload/v1698401422/check-mark_1_djvado.png"
-              alt="state specific confirmed cases pic"
-              className="img"
-            />
-            <p>{confirmedCases}</p>
-          </button>
-        </div>
-        <div
-        // testid="stateSpecificActiveCasesContainer"
-        >
-          <button
-            type="button"
-            className={isActive ? 'back2' : 'card2'}
-            onClick={this.clickActive}
-          >
-            <p>Active</p>
-            <img
-              src="https://res.cloudinary.com/dgahf1oml/image/upload/v1698401347/protection_1_gxcas9.png"
-              alt="state specific active cases pic"
-              className="img"
-            />
-            <p>{confirmedCases}</p>
-          </button>
-        </div>
-        <div
-        // testid="stateSpecificRecoveredCasesContainer"
-        >
-          <button
-            type="button"
-            className={isRecover ? 'back3' : 'card3'}
-            onClick={this.clickRecover}
-          >
-            <p>Recovered</p>
-            <img
-              src="https://res.cloudinary.com/dgahf1oml/image/upload/v1698401115/recovered_1_zik7os.png"
-              alt="state specific recovered cases pic"
-              className="img"
-            />
-            <p>{recoveredCases}</p>
-          </button>
-        </div>
-        <div
-        // testid="stateSpecificDeceasedCasesContainer" key="deceased"
-        >
-          <button
-            type="button"
-            className={isDecease ? 'back4' : 'card4'}
-            onClick={this.clickDecease}
-          >
-            <p>Deceased</p>
-            <img
-              src="https://res.cloudinary.com/dgahf1oml/image/upload/v1698401274/breathing_1_1_wfkllh.png"
-              alt="state specific deceased cases pic"
-              className="img"
-            />
-            <p>{deceasedCases}</p>
-          </button>
-        </div>
-      </>
+      <ul>
+        <li testid="stateSpecificConfirmedCasesContainer" key="confirm">
+          <div>
+            <button
+              type="button"
+              className={isConfirm ? 'back1' : 'card1'}
+              onClick={this.clickConfirm}
+            >
+              <p>Confirmed</p>
+              <img
+                src="https://res.cloudinary.com/dgahf1oml/image/upload/v1698401422/check-mark_1_djvado.png"
+                alt="state specific confirmed cases pic"
+                className="img"
+              />
+              <p>{confirmedCases}</p>
+            </button>
+          </div>
+        </li>
+        <li testid="stateSpecificActiveCasesContainer" key="active">
+          <div>
+            <button
+              type="button"
+              className={isActive ? 'back2' : 'card2'}
+              onClick={this.clickActive}
+            >
+              <p>Active</p>
+              <img
+                src="https://res.cloudinary.com/dgahf1oml/image/upload/v1698401347/protection_1_gxcas9.png"
+                alt="state specific active cases pic"
+                className="img"
+              />
+              <p>{activeCases}</p>
+            </button>
+          </div>
+        </li>
+        <li testid="stateSpecificRecoveredCasesContainer" key="recovered">
+          <div>
+            <button
+              type="button"
+              className={isRecover ? 'back3' : 'card3'}
+              onClick={this.clickRecover}
+            >
+              <p>Recovered</p>
+              <img
+                src="https://res.cloudinary.com/dgahf1oml/image/upload/v1698401115/recovered_1_zik7os.png"
+                alt="state specific recovered cases pic"
+                className="img"
+              />
+              <p>{recoveredCases}</p>
+            </button>
+          </div>
+        </li>
+        <li testid="stateSpecificDeceasedCasesContainer" key="deceased">
+          <div key="deceased">
+            <button
+              type="button"
+              className={isDecease ? 'back4' : 'card4'}
+              onClick={this.clickDecease}
+            >
+              <p>Deceased</p>
+              <img
+                src="https://res.cloudinary.com/dgahf1oml/image/upload/v1698401274/breathing_1_1_wfkllh.png"
+                alt="state specific deceased cases pic"
+                className="img"
+              />
+              <p>{deceasedCases}</p>
+            </button>
+          </div>
+        </li>
+      </ul>
     )
   }
 
@@ -502,7 +444,7 @@ class stateSpecificRoute extends Component {
       isShowMobileView,
       category,
       isLoading,
-      stateCode,
+      id,
       name,
       testedCases,
     } = this.state
@@ -521,9 +463,15 @@ class stateSpecificRoute extends Component {
       'Nov',
       'Dec',
     ]
-
+    const {match} = this.props
+    const {params} = match
+    const {stateCode} = params
+    const isState = statesList.find(each => each.state_code === stateCode)
+    if (isState === undefined) {
+      return <Redirect to="/bad-path" />
+    }
     return (
-      <div className="containerSpecific">
+      <>
         <Header
           isShowMobileView={isShowMobileView}
           onclickMenu={this.onclickMenu}
@@ -531,24 +479,24 @@ class stateSpecificRoute extends Component {
         />
 
         {isLoading ? (
-          <div
-          // testid="stateDetailsLoader"
-          >
+          <div testid="stateDetailsLoader">
             <LoaderSpinner />
           </div>
         ) : (
-          <>
-            <h1 className="heading">{name}</h1>
+          <div className="containerSpecific">
+            <div className="headingBack">
+              <h1 className="heading">{name}</h1>
+            </div>
             <p className="tested">Tested</p>
-            <p className="testedNumber">{testedCases}</p>
+            <h1 className="testedNumber">{testedCases}</h1>
             <p className="datePara">Last update on nov 22th 2029</p>
             {this.getSpecificData()}
             {this.getTopDistricUi()}
-            <BarCharts stateCode={stateCode} category={category} />
+            <BarCharts stateCode={id} category={category.toLowerCase()} />
             <Footer />
-          </>
+          </div>
         )}
-      </div>
+      </>
     )
   }
 }

@@ -1,6 +1,5 @@
 import {FcGenericSortingAsc, FcGenericSortingDesc} from 'react-icons/fc'
 import {AiFillCloseCircle} from 'react-icons/ai'
-
 import {BsSearch} from 'react-icons/bs'
 import {Link} from 'react-router-dom'
 import {Component} from 'react'
@@ -10,6 +9,7 @@ import Footer from '../Footer'
 import Header from '../Header'
 import SearchSuggestions from '../SearchSuggestions'
 import LoaderSpinner from '../LoaderSpinner'
+import Vaccination from '../Vaccination'
 
 const statesList = [
   {
@@ -276,10 +276,7 @@ class Home extends Component {
     return (
       <>
         {newSuggetionList.length !== 0 && (
-          <ul
-            className="sugList"
-            // testid="searchResultsUnorderedList"
-          >
+          <ul className="sugList" testid="searchResultsUnorderedList">
             {newSuggetionList.map(each => (
               <SearchSuggestions
                 stateName={each.stateName}
@@ -305,10 +302,7 @@ class Home extends Component {
     return (
       <>
         <div className="stats-container">
-          <div
-            className="cardconfirm"
-            // testid="countryWideConfirmedCases"
-          >
+          <div className="cardconfirm" testid="countryWideConfirmedCases">
             <p>Confirmed</p>
             <img
               src="https://res.cloudinary.com/dgahf1oml/image/upload/v1698401422/check-mark_1_djvado.png"
@@ -317,10 +311,7 @@ class Home extends Component {
             />
             <p>{confirmedCases}</p>
           </div>
-          <div
-            className="cardactive"
-            // testid="countryWideActiveCases"
-          >
+          <div className="cardactive" testid="countryWideActiveCases">
             <p>Active</p>
             <img
               src="https://res.cloudinary.com/dgahf1oml/image/upload/v1698401347/protection_1_gxcas9.png"
@@ -329,10 +320,7 @@ class Home extends Component {
             />
             <p>{activeCases}</p>
           </div>
-          <div
-            className="cardRecovered"
-            // testid="countryWideRecoveredCases"
-          >
+          <div className="cardRecovered" testid="countryWideRecoveredCases">
             <p>Recovered</p>
             <img
               src="https://res.cloudinary.com/dgahf1oml/image/upload/v1698401115/recovered_1_zik7os.png"
@@ -341,10 +329,7 @@ class Home extends Component {
             />
             <p>{recoveredCases}</p>
           </div>
-          <div
-            className="cardDeceased"
-            // testid="countryWideDeceasedCases"
-          >
+          <div className="cardDeceased" testid="countryWideDeceasedCases">
             <p>Deceased</p>
             <img
               src="https://res.cloudinary.com/dgahf1oml/image/upload/v1698401274/breathing_1_1_wfkllh.png"
@@ -354,10 +339,7 @@ class Home extends Component {
             <p>{deceasedCases}</p>
           </div>
         </div>
-        <div
-          className="contentTable"
-          // testid="stateWiseCovidDataTable"
-        >
+        <div className="contentTable" testid="stateWiseCovidDataTable">
           <div className="horizontalCongtainer">
             <div className="sta">
               <p className="rowHeading">States/UT</p>
@@ -366,7 +348,7 @@ class Home extends Component {
                 type="button"
                 className="sorting-icon"
                 onClick={this.onClickSortingAsc}
-                // testid="ascendingSort"
+                testid="ascendingSort"
               >
                 <FcGenericSortingAsc size="20" className="sorting-icon" />
               </button>
@@ -375,7 +357,7 @@ class Home extends Component {
                 type="button"
                 className="sorting-icon"
                 onClick={this.onClickSortingDesc}
-                // testid="descendingSort"
+                testid="descendingSort"
               >
                 <FcGenericSortingDesc size="20" className="sorting-icon" />
               </button>
@@ -419,9 +401,7 @@ class Home extends Component {
         />
 
         {isLoading ? (
-          <div
-          // testid="homeRouteLoader"
-          >
+          <div testid="homeRouteLoader">
             <LoaderSpinner />
           </div>
         ) : (
@@ -438,6 +418,11 @@ class Home extends Component {
                   <li>
                     <Link to="/about" className="item">
                       About
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/Vaccination" className="item">
+                      Vaccination
                     </Link>
                   </li>
                   <li>

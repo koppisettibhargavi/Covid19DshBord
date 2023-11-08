@@ -86,9 +86,7 @@ class BarCharts extends Component {
   }
 
   getDataBar = async () => {
-    const {match} = this.props
-    const {params} = match
-    const {stateCode} = params
+    const {stateCode, category} = this.props
 
     const url = 'https://apis.ccbp.in/covid19-timelines-data'
     const options = {
@@ -106,7 +104,7 @@ class BarCharts extends Component {
       recovered: data[stateCode].dates[date].total.recovered,
       tested: data[stateCode].dates[date].total.tested,
     }))
-    this.setState({listData: list, isLoading: false})
+    this.setState({listData: list, isLoading: false, category})
   }
 
   getTimeLineChart = (chartColor, chartType) => {
@@ -158,15 +156,11 @@ class BarCharts extends Component {
     return (
       <>
         {isLoading ? (
-          <div
-          // testid="timelinesDataLoader"
-          >
+          <div testid="timelinesDataLoader">
             <LoaderSpinner />
           </div>
         ) : (
-          <div
-          // testid="lineChartsContainer"
-          >
+          <div>
             <div className="BarChart">
               <ResponsiveContainer width="100%" height={500}>
                 <BarChart
@@ -202,21 +196,23 @@ class BarCharts extends Component {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-
-            <div className="lineContainer1">
-              {this.getTimeLineChart('red', 'confirmed')}
-            </div>
-            <div className="lineContainer2">
-              {this.getTimeLineChart('blue', 'active')}
-            </div>
-            <div className="lineContainer3">
-              {this.getTimeLineChart('green', 'recovered')}
-            </div>
-            <div className="lineContainer4">
-              {this.getTimeLineChart('#6C757D', 'deceased')}
-            </div>
-            <div className="lineContainer5">
-              {this.getTimeLineChart('#230F41', 'tested')}
+            <div testid="lineChartsContainer">
+              <h1>Spread Trends</h1>
+              <div className="lineContainer1">
+                {this.getTimeLineChart('red', 'confirmed')}
+              </div>
+              <div className="lineContainer2">
+                {this.getTimeLineChart('blue', 'active')}
+              </div>
+              <div className="lineContainer3">
+                {this.getTimeLineChart('green', 'recovered')}
+              </div>
+              <div className="lineContainer4">
+                {this.getTimeLineChart('#6C757D', 'deceased')}
+              </div>
+              <div className="lineContainer5">
+                {this.getTimeLineChart('#230F41', 'tested')}
+              </div>
             </div>
           </div>
         )}

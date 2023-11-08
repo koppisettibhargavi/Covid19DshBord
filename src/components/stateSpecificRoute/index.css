@@ -3,7 +3,6 @@
   color: white;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
 }
 .tested {
   color: var(--light-blue-gray-400, #94a3b8);
@@ -122,12 +121,15 @@
   border-style: none;
 }
 .heading {
-  color: var(--light-light-blue-500, #0ea5e9);
-  font-family: HK Grotesk;
+  color: #0ea5e9;
   font-size: 22px;
   font-style: normal;
   font-weight: 300;
-  line-height: 48px; /* 150% */
+  line-height: 48px;
+}
+.states {
+  display: flex;
+  flex-direction: row;
 }
 .test {
   padding-right: 100px;

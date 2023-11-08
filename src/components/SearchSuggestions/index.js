@@ -9,7 +9,7 @@ const SearchSuggestions = props => {
 
   return (
     <li className="list">
-      <Link to={`/state/${id}`}>
+      <Link to={`/state/${stateCode}`}>
         <button type="button" className="button">
           <p className="para">{stateName}</p>
           <div>

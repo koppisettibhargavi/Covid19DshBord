@@ -25,6 +25,11 @@ const Header = props => {
             About
           </Link>
         </li>
+        <li>
+          <Link to="/Vaccination" className="item">
+            Vaccination
+          </Link>
+        </li>
       </ul>
 
       <div className="showMenu">

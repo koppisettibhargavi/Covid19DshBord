@@ -44,10 +44,7 @@ class About extends Component {
         <p className="about-description">
           COVID-19 vaccines be ready for distribution
         </p>
-        <ul
-          className="list-items-container"
-          // testid="faqsUnorderedList"
-        >
+        <ul className="list-items-container" testid="faqsUnorderedList">
           {faqList.map(eachFaq => (
             <AboutItem key={eachFaq.qno} faqDetails={eachFaq} />
           ))}
@@ -62,9 +59,7 @@ class About extends Component {
       <>
         <Header />
         {isLoading ? (
-          <div
-          // testid="aboutRouteLoader"
-          >
+          <div testid="aboutRouteLoader">
             <LoaderSpinner />
           </div>
         ) : (

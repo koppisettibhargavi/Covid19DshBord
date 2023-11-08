@@ -1,13 +1,4 @@
-import {Switch, Route, Redirect} from 'react-router-dom'
-import Home from './components/Home'
-import Header from './components/Header'
-import Footer from './components/Footer'
-import About from './components/About'
-import NotFound from './components/NotFound'
-import stateSpecificRoute from './components/stateSpecificRoute'
-import Vaccination from './components/Vaccination'
-import ProtectedRoute from './components/ProtectedRoute'
-import './App.css'
+import {Route, Redirect} from 'react-router-dom'
 
 const statesList = [
   {
@@ -156,16 +147,16 @@ const statesList = [
   },
 ]
 
-const App = () => (
-  <Switch>
-    <Route exact path="/" component={Home} />
-    <Route exact path="/about" component={About} />
-    <Route exact path="/vaccination" component={Vaccination} />
-
-    <Route exact path="/state/:stateCode" component={stateSpecificRoute} />
-    <Route exact path="/bad-path" component={NotFound} />
-    <Redirect to="bad-path" />
-  </Switch>
-)
-
-export default App
+const ProtectedRoute = props => {
+  const {match} = props
+  const {params} = match
+  const {stateCode} = params
+  console.log(stateCode)
+  const isInclude = statesList.find(each => each.state_code === stateCode)
+  console.log(isInclude)
+  if (isInclude !== undefined) {
+    return <Redirect to="/notfound" />
+  }
+  return <Route {...props} />
+}
+export default ProtectedRoute
