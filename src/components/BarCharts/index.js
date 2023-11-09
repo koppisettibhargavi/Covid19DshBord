@@ -1,17 +1,16 @@
 import {Component} from 'react'
 import {withRouter} from 'react-router-dom'
-
 import {
-  BarChart,
-  Bar,
+  LineChart,
   XAxis,
   YAxis,
-  Legend,
-  ResponsiveContainer,
-  Tooltip,
-  LineChart,
-  Line,
   CartesianGrid,
+  Tooltip,
+  Legend,
+  Line,
+  BarChart,
+  Bar,
+  ResponsiveContainer,
 } from 'recharts'
 import LoaderSpinner from '../LoaderSpinner'
 import './index.css'
@@ -94,7 +93,7 @@ class BarCharts extends Component {
     }
     const response = await fetch(url, options)
     const data = await response.json()
-
+    console.log(data)
     const keyNames = Object.keys(data[stateCode].dates)
 
     const list = keyNames.map(date => ({
@@ -102,14 +101,21 @@ class BarCharts extends Component {
       confirmed: data[stateCode].dates[date].total.confirmed,
       deceased: data[stateCode].dates[date].total.deceased,
       recovered: data[stateCode].dates[date].total.recovered,
+      active:
+        data[stateCode].dates[date].total.confirmed -
+        (data[stateCode].dates[date].total.deceased +
+          data[stateCode].dates[date].total.recovered),
       tested: data[stateCode].dates[date].total.tested,
     }))
+    console.log(list)
     this.setState({listData: list, isLoading: false, category})
   }
 
   getTimeLineChart = (chartColor, chartType) => {
-    const chartData = this.getChartData(chartType)
+    //  const chartData = this.getChartData(chartType)
 
+    const {listData} = this.state
+    const maxSearchChart = listData.slice(Math.max(listData.length - 10, 0))
     const DataFormatter = number => {
       if (number > 1000) {
         return `${(number / 1000).toString()}k`
@@ -118,24 +124,22 @@ class BarCharts extends Component {
     }
 
     return (
-      <div className="LineChart">
-        <LineChart
-          width={730}
-          height={250}
-          data={chartData}
-          margin={{top: 5, right: 30, left: 20, bottom: 5}}
-        >
-          <XAxis dataKey="name" />
-          <YAxis tickFormatter={DataFormatter} />
-          <Tooltip />
-
-          <Line
-            type="monotone"
-            dataKey="values"
-            stroke={chartColor}
-            strokeWidth={1}
-          />
-        </LineChart>
+      <div>
+        <h1>Line Chart</h1>
+        <div className="App">
+          <LineChart
+            width={730}
+            height={250}
+            data={listData}
+            margin={{top: 5, right: 30, left: 20, bottom: 5}}
+          >
+            <XAxis dataKey="date" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey={chartType} stroke={chartColor} />
+          </LineChart>
+        </div>
       </div>
     )
   }
@@ -144,8 +148,8 @@ class BarCharts extends Component {
     const {category} = this.props
     const {listData, isLoading} = this.state
     const color = this.getColor(category)
-    const ChartData = this.getChartData(category)
-    const maxSearchChart = ChartData.slice(Math.max(ChartData.length - 10, 0))
+    // const ChartData = this.getChartData(category)
+    const maxSearchChart = listData.slice(Math.max(listData.length - 10, 0))
     const DataFormatter = number => {
       if (number > 1000) {
         return `${(number / 1000).toString()}k`
@@ -160,44 +164,25 @@ class BarCharts extends Component {
             <LoaderSpinner />
           </div>
         ) : (
-          <div>
-            <div className="BarChart">
-              <ResponsiveContainer width="100%" height={500}>
-                <BarChart
-                  data={maxSearchChart}
-                  margin={{
-                    top: 5,
-                  }}
-                >
-                  <XAxis
-                    dataKey="name"
-                    axisLine={false}
-                    tick={{
-                      stroke: {color},
-                      strokeWidth: 0,
-                    }}
-                  />
-                  <YAxis
-                    tickFormatter={DataFormatter}
-                    axisLine={false}
-                    tick={{
-                      stroke: {color},
-                      strokeWidth: 0,
-                    }}
-                  />
-
-                  <Tooltip />
-                  <Bar
-                    dataKey="values"
-                    name={category}
-                    fill={color}
-                    barSize={60}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+          <>
+            <h1>Bar Chart</h1>
+            <div>
+              <BarChart width={800} height={450} data={maxSearchChart}>
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar
+                  dataKey={category}
+                  fill={color}
+                  className="bar"
+                  label={{position: 'top', color: 'white'}}
+                />
+              </BarChart>
             </div>
+
+            <h1>Spread Trends</h1>
             <div testid="lineChartsContainer">
-              <h1>Spread Trends</h1>
               <div className="lineContainer1">
                 {this.getTimeLineChart('red', 'confirmed')}
               </div>
@@ -214,7 +199,7 @@ class BarCharts extends Component {
                 {this.getTimeLineChart('#230F41', 'tested')}
               </div>
             </div>
-          </div>
+          </>
         )}
       </>
     )

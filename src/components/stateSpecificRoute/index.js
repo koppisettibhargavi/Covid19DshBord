@@ -159,7 +159,7 @@ class stateSpecificRoute extends Component {
     isLoading: true,
     lastUpDated: '',
     isShowMobileView: false,
-    isConfirm: false,
+    isConfirm: true,
     isActive: false,
     isRecover: false,
     isDecease: false,
@@ -174,7 +174,7 @@ class stateSpecificRoute extends Component {
 
   clickConfirm = () => {
     this.setState(prevState => ({
-      isConfirm: !prevState.isConfirm,
+      isConfirm: true,
       isActive: false,
       isRecover: false,
       isDecease: false,
@@ -184,7 +184,7 @@ class stateSpecificRoute extends Component {
 
   clickActive = () => {
     this.setState(prevState => ({
-      isActive: !prevState.isActive,
+      isActive: true,
       isConfirm: false,
       isRecover: false,
       isDecease: false,
@@ -194,7 +194,7 @@ class stateSpecificRoute extends Component {
 
   clickRecover = () => {
     this.setState(prevState => ({
-      isRecover: !prevState.isRecover,
+      isRecover: true,
       isActive: false,
       isConfirm: false,
       isDecease: false,
@@ -204,7 +204,7 @@ class stateSpecificRoute extends Component {
 
   clickDecease = () => {
     this.setState(prevState => ({
-      isDecease: !prevState.isDecease,
+      isDecease: true,
       isRecover: false,
       isConfirm: false,
       isActive: false,
@@ -245,40 +245,36 @@ class stateSpecificRoute extends Component {
     }
     const response = await fetch(url, options)
     const data = await response.json()
-
+    console.log(data)
     const isStateCode = statesList.filter(
       eachitem => eachitem.state_code === stateCode,
     )
     const Name = isStateCode[0].state_name
 
+    const date = data[stateCode].meta.last_updated
+    const rowData = data
     let recoveredCases = 0
     let deceasedCases = 0
     let confirmedCases = 0
     let testedCases = 0
-    statesList.forEach(eachState => {
-      if (data[eachState.state_code]) {
-        const {total} = data[eachState.state_code]
-        confirmedCases += total.confirmed ? total.confirmed : 0
-        recoveredCases += total.recovered ? total.recovered : 0
-        deceasedCases += total.deceased ? total.deceased : 0
-        testedCases += total.tested ? total.tested : 0
-      }
-    })
+    const {total} = rowData[stateCode]
+    confirmedCases += total.confirmed ? total.confirmed : 0
+    recoveredCases += total.recovered ? total.recovered : 0
+    deceasedCases += total.deceased ? total.deceased : 0
+    testedCases += total.tested ? total.tested : 0
     const dc = deceasedCases + recoveredCases
-    const date = data[stateCode].meta.last_updated
-    const rowData = data
 
     this.setState({
-      activeCases: confirmedCases - dc,
-      recoveredCases,
-      deceasedCases,
-      confirmedCases,
-      testedCases,
       isLoading: false,
       date,
       id: stateCode,
       name: Name,
       rowData,
+      activeCases: confirmedCases - dc,
+      recoveredCases,
+      deceasedCases,
+      confirmedCases,
+      testedCases,
     })
   }
 
@@ -301,8 +297,6 @@ class stateSpecificRoute extends Component {
               : 0,
           },
     )
-
-    console.log(dataElement)
     dataElement.sort((a, b) => b.value - a.value)
     const activeData = listOfDistricts.map(eachActive =>
       DistrictsData[eachActive].total === undefined
@@ -446,9 +440,9 @@ class stateSpecificRoute extends Component {
       isLoading,
       id,
       name,
+      date,
       testedCases,
     } = this.state
-
     const months = [
       'Jan',
       'Feb',
@@ -488,8 +482,8 @@ class stateSpecificRoute extends Component {
               <h1 className="heading">{name}</h1>
             </div>
             <p className="tested">Tested</p>
-            <h1 className="testedNumber">{testedCases}</h1>
-            <p className="datePara">Last update on nov 22th 2029</p>
+            <p className="testedNumber">{testedCases}</p>
+            <p className="datePara"> {`last update on ${date}`}</p>
             {this.getSpecificData()}
             {this.getTopDistricUi()}
             <BarCharts stateCode={id} category={category.toLowerCase()} />
