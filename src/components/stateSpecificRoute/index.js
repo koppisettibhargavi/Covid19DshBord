@@ -157,15 +157,13 @@ const statesList = [
 class stateSpecificRoute extends Component {
   state = {
     isLoading: true,
-    lastUpDated: '',
     isShowMobileView: false,
     isConfirm: true,
     isActive: false,
     isRecover: false,
     isDecease: false,
     category: 'Confirmed',
-    id: '',
-    DistrictData: [],
+    List: [],
   }
 
   componentDidMount() {
@@ -235,130 +233,69 @@ class stateSpecificRoute extends Component {
   }
 
   getStateData = async () => {
-    const {match} = this.props
-    const {params} = match
-    const {stateCode} = params
-
     const url = 'https://apis.ccbp.in/covid19-state-wise-data'
     const options = {
       method: 'Get',
     }
+    const {match} = this.props
+    const {params} = match
+    const {stateCode} = params
     const response = await fetch(url, options)
-    const data = await response.json()
-    console.log(data)
-    const isStateCode = statesList.filter(
-      eachitem => eachitem.state_code === stateCode,
-    )
-    const Name = isStateCode[0].state_name
-
-    const date = data[stateCode].meta.last_updated
-    const rowData = data
-    let recoveredCases = 0
-    let deceasedCases = 0
-    let confirmedCases = 0
-    let testedCases = 0
-    const {total} = rowData[stateCode]
-    confirmedCases += total.confirmed ? total.confirmed : 0
-    recoveredCases += total.recovered ? total.recovered : 0
-    deceasedCases += total.deceased ? total.deceased : 0
-    testedCases += total.tested ? total.tested : 0
-    const dc = deceasedCases + recoveredCases
-
-    this.setState({
-      isLoading: false,
-      date,
-      id: stateCode,
-      name: Name,
-      rowData,
-      activeCases: confirmedCases - dc,
-      recoveredCases,
-      deceasedCases,
-      confirmedCases,
-      testedCases,
-    })
-  }
-
-  getTopData = category => {
-    const {rowData, id} = this.state
-    const DistrictsData = rowData[id].districts
-    const listOfDistricts = Object.keys(DistrictsData)
-    console.log(DistrictsData)
-    const lowerCategory = category.toLowerCase()
-    const dataElement = listOfDistricts.map(eachItem =>
-      DistrictsData[eachItem].total === undefined
-        ? {
-            name: eachItem,
-            value: 0,
+    const List = []
+    if (response.ok === true) {
+      const data = await response.json()
+      console.log(data)
+      const s = statesList.map(each => {
+        if (each.state_code) {
+          return {
+            stateName: each.state_name,
+            stateId: each.state_code,
+            stateConfirmed: data[each.state_code].total.confirmed,
+            stateDeceased: data[each.state_code].total.deceased,
+            stateRecovered: data[each.state_code].total.recovered,
+            stateTested: data[each.state_code].total.tested,
+            stateActiveCases:
+              data[each.state_code].total.confirmed -
+              (data[each.state_code].total.recovered +
+                data[each.state_code].total.deceased),
+            statePopulation: data[each.state_code].meta.population,
+            lastUpdated: data[each.state_code].meta.date,
+            districData: data[each.state_code].districts,
           }
-        : {
-            name: eachItem,
-            value: DistrictsData[eachItem].total[lowerCategory]
-              ? DistrictsData[eachItem].total[lowerCategory]
-              : 0,
-          },
-    )
-    dataElement.sort((a, b) => b.value - a.value)
-    const activeData = listOfDistricts.map(eachActive =>
-      DistrictsData[eachActive].total === undefined
-        ? {
-            name: eachActive,
-            value: 0,
-          }
-        : {
-            name: eachActive,
-            value:
-              DistrictsData[eachActive].total.confirmed -
-              (DistrictsData[eachActive].total.recovered +
-                DistrictsData[eachActive].total.deceased)
-                ? DistrictsData[eachActive].total.confirmed -
-                  (DistrictsData[eachActive].total.recovered +
-                    DistrictsData[eachActive].total.deceased)
-                : 0,
-          },
-    )
-    activeData.sort((a, b) => b.value - a.value)
-
-    if (category === 'Active') {
-      return activeData
+        }
+        return {
+          stateName: '',
+          stateId: each.state_code,
+          stateConfirmed: 0,
+          stateDeceased: 0,
+          stateRecovered: 0,
+          stateTested: 0,
+          stateActiveCases: 0,
+          statePopulation: 0,
+          lastUpdated: 0,
+          districData: {unknown: {vacination: 0}},
+        }
+      })
+      this.setState({List: s, isLoading: false})
+      console.log(s, 'newarray')
+    } else {
+      console.log('fetch error')
     }
-    return dataElement
-  }
-
-  getTopDistricUi = () => {
-    const {category} = this.state
-    const HeadingColor = this.getcolor(category)
-    const TopDistrictData = this.getTopData(category)
-    console.log(TopDistrictData, 'topData')
-    return (
-      <>
-        <h1 className={HeadingColor}>Top Districts</h1>
-        <ul className="list" testid="topDistrictsUnorderedList">
-          {TopDistrictData.map(each => (
-            <TopDistric name={each.name} number={each.value} key={each.name} />
-          ))}
-        </ul>
-      </>
-    )
   }
 
   getSpecificData = () => {
-    const {
-      date,
-      testedCases,
-      activeCases,
-      recoveredCases,
-      deceasedCases,
-      confirmedCases,
-      isLoading,
-      isActive,
-      isConfirm,
-      isDecease,
-      isRecover,
-      category,
-      list,
-      stateCode,
-    } = this.state
-
+    const {isConfirm, isActive, isDecease, isRecover, List} = this.state
+    const {match} = this.props
+    const {params} = match
+    const {stateCode} = params
+    console.log(stateCode, 'code')
+    console.log(List, 'list')
+    const specificState = List.filter(each => each.stateId === stateCode)
+    console.log(specificState, 'specificState')
+    const {stateConfirmed, stateDeceased, stateRecovered, stateActiveCases} = {
+      ...specificState[0],
+    }
+    console.log(stateConfirmed, 'confirmed')
     return (
       <ul>
         <li testid="stateSpecificConfirmedCasesContainer" key="confirm">
@@ -374,7 +311,7 @@ class stateSpecificRoute extends Component {
                 alt="state specific confirmed cases pic"
                 className="img"
               />
-              <p>{confirmedCases}</p>
+              <p>{stateConfirmed}</p>
             </button>
           </div>
         </li>
@@ -391,7 +328,7 @@ class stateSpecificRoute extends Component {
                 alt="state specific active cases pic"
                 className="img"
               />
-              <p>{activeCases}</p>
+              <p>{stateActiveCases}</p>
             </button>
           </div>
         </li>
@@ -408,7 +345,7 @@ class stateSpecificRoute extends Component {
                 alt="state specific recovered cases pic"
                 className="img"
               />
-              <p>{recoveredCases}</p>
+              <p>{stateRecovered}</p>
             </button>
           </div>
         </li>
@@ -425,7 +362,7 @@ class stateSpecificRoute extends Component {
                 alt="state specific deceased cases pic"
                 className="img"
               />
-              <p>{deceasedCases}</p>
+              <p>{stateDeceased}</p>
             </button>
           </div>
         </li>
@@ -433,16 +370,93 @@ class stateSpecificRoute extends Component {
     )
   }
 
+  getTopData = () => {
+    const {List, category} = this.state
+    const {match} = this.props
+    const {params} = match
+    const {stateCode} = params
+    console.log(stateCode, 'code')
+    console.log(List, 'list')
+    const specificState = List.filter(each => each.stateId === stateCode)
+    console.log(specificState, 'specificState')
+    const {districData} = {
+      ...specificState[0],
+    }
+    console.log(districData, 'distric')
+    const listOfDistricts = Object.keys(districData)
+    const lowerCategory = category.toLowerCase()
+    if (districData === undefined) {
+      return null
+    }
+    const dataElement = listOfDistricts.map(eachItem =>
+      districData[eachItem].total === undefined
+        ? {
+            name: eachItem,
+            value: 0,
+          }
+        : {
+            name: eachItem,
+            value: districData[eachItem].total[lowerCategory]
+              ? districData[eachItem].total[lowerCategory]
+              : 0,
+          },
+    )
+
+    dataElement.sort((a, b) => b.value - a.value)
+
+    const activeData = listOfDistricts.map(eachActive =>
+      districData[eachActive].total === undefined
+        ? {
+            name: eachActive,
+            value: 0,
+          }
+        : {
+            name: eachActive,
+            value:
+              districData[eachActive].total.confirmed -
+              (districData[eachActive].total.recovered +
+                districData[eachActive].total.deceased)
+                ? districData[eachActive].total.confirmed -
+                  (districData[eachActive].total.recovered +
+                    districData[eachActive].total.deceased)
+                : 0,
+          },
+    )
+
+    activeData.sort((a, b) => b.value - a.value)
+
+    if (category === 'Active') {
+      return activeData
+    }
+    return dataElement
+  }
+
+  getTopDistricUi = () => {
+    const {category} = this.state
+    const HeadingColor = this.getcolor(category)
+    const TopDistrictData = this.getTopData()
+    console.log(TopDistrictData, 'topData')
+    return (
+      <>
+        <h1 className={HeadingColor}>Top Districts</h1>
+        <ul className="list" testid="topDistrictsUnorderedList">
+          {TopDistrictData.map(each => (
+            <TopDistric name={each.name} number={each.value} key={each.name} />
+          ))}
+        </ul>
+      </>
+    )
+  }
+
   render() {
-    const {
-      isShowMobileView,
-      category,
-      isLoading,
-      id,
-      name,
-      date,
-      testedCases,
-    } = this.state
+    const {List, isShowMobileView, isLoading, category} = this.state
+    const {match} = this.props
+    const {params} = match
+    const {stateCode} = params
+    console.log(stateCode, 'code')
+    console.log(List, 'list')
+    const specificState = List.filter(each => each.stateId === stateCode)
+    console.log(specificState, 'specificState')
     const months = [
       'Jan',
       'Feb',
@@ -457,40 +471,45 @@ class stateSpecificRoute extends Component {
       'Nov',
       'Dec',
     ]
-    const {match} = this.props
-    const {params} = match
-    const {stateCode} = params
+    const {stateId, stateName, stateTested, lastUpdated} = {...specificState[0]}
     const isState = statesList.find(each => each.state_code === stateCode)
-    if (isState === undefined) {
-      return <Redirect to="/bad-path" />
-    }
+    console.log(isState, 'isstate')
     return (
-      <>
-        <Header
-          isShowMobileView={isShowMobileView}
-          onclickMenu={this.onclickMenu}
-          close={this.close}
-        />
+      <div>
+        {isState && (
+          <div>
+            <Header
+              isShowMobileView={isShowMobileView}
+              onclickMenu={this.onclickMenu}
+              close={this.close}
+            />
 
-        {isLoading ? (
-          <div testid="stateDetailsLoader">
-            <LoaderSpinner />
-          </div>
-        ) : (
-          <div className="containerSpecific">
-            <div className="headingBack">
-              <h1 className="heading">{name}</h1>
-            </div>
-            <p className="tested">Tested</p>
-            <p className="testedNumber">{testedCases}</p>
-            <p className="datePara"> {`last update on ${date}`}</p>
-            {this.getSpecificData()}
-            {this.getTopDistricUi()}
-            <BarCharts stateCode={id} category={category.toLowerCase()} />
-            <Footer />
+            {isLoading ? (
+              <div testid="stateDetailsLoader">
+                <LoaderSpinner />
+              </div>
+            ) : (
+              <div className="containerSpecific">
+                <div className="headingBack">
+                  <h1 className="heading">{stateName}</h1>
+                </div>
+                <p className="tested">Tested</p>
+                <p className="testedNumber">{stateTested}</p>
+                <p className="datePara"> {`last update on ${lastUpdated}`}</p>
+                {this.getSpecificData()}
+                {this.getTopDistricUi()}
+                {
+                  <BarCharts
+                    stateId={stateId}
+                    category={category.toLowerCase()}
+                  />
+                }
+                <Footer />
+              </div>
+            )}
           </div>
         )}
-      </>
+      </div>
     )
   }
 }
